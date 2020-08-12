@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.FontsContract;
 import android.util.DisplayMetrics;
+import org.conscrypt.OpenSSLProvider;
 import com.google.common.annotations.VisibleForTesting;
 import java.lang.reflect.Method;
 import java.nio.file.FileSystem;
@@ -36,7 +37,6 @@ import java.security.Security;
 import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.inject.Named;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.robolectric.ApkLoader;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.Bootstrap;
@@ -140,8 +140,8 @@ public class AndroidTestEnvironment implements TestEnvironment {
       loggingInitialized = true;
     }
 
-    if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
-      Security.insertProviderAt(new BouncyCastleProvider(), 1);
+    if (Security.getProvider("Conscrypt") == null) {
+      Security.insertProviderAt(new OpenSSLProvider(), 1);
     }
 
     android.content.res.Configuration androidConfiguration =
