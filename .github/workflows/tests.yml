@@ -10,7 +10,6 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    needs: build
     strategy:
       fail-fast: false
 
