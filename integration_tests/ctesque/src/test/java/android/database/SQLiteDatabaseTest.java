@@ -18,10 +18,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.internal.DoNotInstrument;
+import org.robolectric.annotation.SQLiteMode;
 
 /** Compatibility test for {@link android.database.sqlite.SQLiteDatabase} */
 @DoNotInstrument
 @RunWith(AndroidJUnit4.class)
+@SQLiteMode(SQLiteMode.Mode.NATIVE)
 public class SQLiteDatabaseTest {
 
   private SQLiteDatabase database;

@@ -113,6 +113,8 @@ public class SQLiteLibraryLoader {
     if (name.contains("win")) {
       return OS_WIN;
     } else if (name.contains("linux")) {
+
+
       return OS_LINUX;
     } else if (name.contains("mac")) {
       return OS_MAC;

@@ -67,10 +67,10 @@ int ashmem_create_region(const char* /*ignored*/, size_t size) {
 
   unlink(pattern);
 
-  if (TEMP_FAILURE_RETRY(ftruncate(fd, size)) == -1) {
-    close(fd);
-    return -1;
-  }
+  long int result = 0;
+  do {
+    result = ftruncate(fd, size);
+  } while (result == -1L && errno == EINTR);
 
   return fd;
 }
