@@ -25,8 +25,7 @@ static def arch() {
 }
 
 task cmakeNativeRuntime(type:Exec) {
-  workingDir "$buildDir/cpp"
-  commandLine 'cmake', "$projectDir/cpp/"
+  commandLine 'cmake', "-S", "$projectDir/cpp/", "-B", "$buildDir/cpp"
   doFirst {
     mkdir "$buildDir/cpp"
   }

@@ -40,10 +40,7 @@ set(SQLITE_COMPILE_OPTIONS
 
 include_directories(${ANDROID_SQLITE_DIR}/dist)
 include_directories(${ANDROID_SQLITE_DIR}/android)
-
-#if(APPLE)
-#    include_directories(/opt/homebrew/opt/icu4c/include)
-#endif()
+include_directories(${ICU_INCLUDE_DIRS})
 
 add_library(androidsqlite STATIC
   ${ANDROID_SQLITE_DIR}/android/OldPhoneNumberUtils.cpp
@@ -57,11 +54,8 @@ add_library(androidsqlite STATIC
 target_compile_options(androidsqlite PRIVATE ${SQLITE_COMPILE_OPTIONS})
 
 target_link_libraries(androidsqlite
-    /opt/homebrew/opt/icu4c/lib/libicuuc.a
-    /opt/homebrew/opt/icu4c/lib/libicui18n.a
-    /opt/homebrew/opt/icu4c/lib/libicudata.a
-#  ICU::uc
-#  ICU::i18n
+  ICU::uc
+  ICU::i18n
 )
 
 include_directories(${JNI_INCLUDE_DIRS})
@@ -82,8 +76,6 @@ include_directories(libcutils/include)
 
 include_directories(base/include)
 
-include_directories(${ICU_INCLUDE_DIRS})
-
 add_library(nativeruntime SHARED
   jni/AndroidRuntime.cpp
   jni/AndroidRuntime.h
@@ -94,16 +86,12 @@ add_library(nativeruntime SHARED
   jni/robo_android_database_SQLiteConnection.cpp
 )
 
-# if(APPLE)
-#  link_directories(nativeruntime /opt/homebrew/opt/icu4c/lib)
-# endif()
-
 target_link_libraries(nativeruntime
-  # -static-libgcc
-  -static-libstdc++
   log
   utils
   androidsqlite
   cutils
   androidfw
+  ICU::uc
+  ICU::i18n
 )
