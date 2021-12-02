@@ -27,7 +27,7 @@
 #include <log/log.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
+// #include <sys/mman.h>
 #include <unistd.h>
 
 namespace android {
@@ -43,7 +43,8 @@ CursorWindow::CursorWindow(const String8& name, int ashmemFd, void* data,
 }
 
 CursorWindow::~CursorWindow() {
-  ::munmap(mData, mSize);
+  //::munmap(mData, mSize);
+  free(mData);
   ::close(mAshmemFd);
 }
 
@@ -58,21 +59,22 @@ status_t CursorWindow::create(const String8& name, size_t size,
     result = -errno;
     ALOGE("CursorWindow: ashmem_create_region() failed: errno=%d.", errno);
   } else {
-    result = ashmem_set_prot_region(ashmemFd, PROT_READ | PROT_WRITE);
+    result = ashmem_set_prot_region(ashmemFd, 0);
     if (result < 0) {
       ALOGE("CursorWindow: ashmem_set_prot_region() failed: errno=%d", errno);
     } else {
-      void* data = ::mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED,
-                          ashmemFd, 0);
-      if (data == MAP_FAILED) {
-        result = -errno;
-        ALOGE("CursorWindow: mmap() failed: errno=%d.", errno);
-      } else {
-        result = ashmem_set_prot_region(ashmemFd, PROT_READ);
-        if (result < 0) {
-          ALOGE("CursorWindow: ashmem_set_prot_region() failed: errno=%d.",
-                errno);
-        } else {
+      void *data = malloc(size);
+      //void* data = ::mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED,
+      //                    ashmemFd, 0);
+      // if (data == MAP_FAILED) {
+      //   result = -errno;
+      //   ALOGE("CursorWindow: mmap() failed: errno=%d.", errno);
+      // } else {
+      //  result = ashmem_set_prot_region(ashmemFd, PROT_READ);
+      //  if (result < 0) {
+      //    ALOGE("CursorWindow: ashmem_set_prot_region() failed: errno=%d.",
+      //          errno);
+       // } else {
           CursorWindow* window =
               new CursorWindow(name, ashmemFd, data, size, false /*readOnly*/);
           result = window->clear();
@@ -86,10 +88,10 @@ status_t CursorWindow::create(const String8& name, size_t size,
             return OK;
           }
           delete window;
-        }
+       // }
       }
-      ::munmap(data, size);
-    }
+      //::munmap(data, size);
+    //}
     ::close(ashmemFd);
   }
   *outCursorWindow = nullptr;

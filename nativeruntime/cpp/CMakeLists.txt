@@ -5,13 +5,19 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Building the nativeruntime does not work with GCC due to libstddc++ linker errors.
 # TODO: figure out which linker args are needed to build with GCC.
-set(CMAKE_C_COMPILER "clang")
-set(CMAKE_CXX_COMPILER "clang++")
+# set(CMAKE_C_COMPILER "clang")
+# set(CMAKE_CXX_COMPILER "clang++")
 
 # Some libutils headers require C++17
 set (CMAKE_CXX_STANDARD 17)
 
 project(nativeruntime)
+
+set(JAVA_AWT_INCLUDE_PATH NotNeeded)
+set(JAVA_AWT_LIBRARY NotNeeded)
+set(JAVA_JVM_LIBRARY "$ENV{JAVA_HOME}/lib/server/libjvm.so")
+set(JAVA_INCLUDE_PATH "$ENV{JAVA_HOME}/include")
+set(JAVA_INCLUDE_PATH2 "$ENV{JAVA_HOME}/include/win32")
 
 find_package(JNI REQUIRED)
 
@@ -23,15 +29,15 @@ endif()
 
 if(DEFINED ENV{ICU_ROOT_DIR})
 
-  if(NOT EXISTS "$ENV{ICU_ROOT_DIR}/lib/libicui18n.a")
-    message(FATAL_ERROR "ICU_ROOT_DIR does not contain 'lib/libicui18n.a'")
+  if(NOT EXISTS "$ENV{ICU_ROOT_DIR}/lib/libsicuin.a")
+    message(FATAL_ERROR "ICU_ROOT_DIR does not contain 'lib/libicuin.a'")
   endif()
 
   message(NOTICE "Using $ENV{ICU_ROOT_DIR} as the ICU root dir")
   list(APPEND CMAKE_PREFIX_PATH "$ENV{ICU_ROOT_DIR}")
-  find_library(STATIC_ICUI18N_LIBRARY libicui18n.a)
-  find_library(STATIC_ICUUC_LIBRARY libicuuc.a)
-  find_library(STATIC_ICUDATA_LIBRARY libicudata.a)
+  find_library(STATIC_ICUI18N_LIBRARY libsicuin.a)
+  find_library(STATIC_ICUUC_LIBRARY libsicuuc.a)
+  find_library(STATIC_ICUDATA_LIBRARY libsicudt.a)
   include_directories($ENV{ICU_ROOT_DIR}/include)
 else()
   set(ICU_SUBMODULE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/icu")
@@ -97,9 +103,14 @@ add_library(androidsqlite STATIC
 target_compile_options(androidsqlite PRIVATE ${SQLITE_COMPILE_OPTIONS})
 
 target_link_libraries(androidsqlite
+  -static 
   ${STATIC_ICUI18N_LIBRARY}
   ${STATIC_ICUUC_LIBRARY}
   ${STATIC_ICUDATA_LIBRARY}
+  # -ldl
+  # -lpthread
+  gcc
+  stdc++
 )
 
 include_directories(${JNI_INCLUDE_DIRS})
@@ -131,19 +142,13 @@ add_library(nativeruntime SHARED
 )
 
 target_link_libraries(nativeruntime
+  -static
+  androidsqlite
+  androidfw
   log
   utils
-  androidsqlite
   cutils
-  androidfw
+  gcc
+  stdc++
+  -Wl,--no-undefined # print an error if there are any undefined symbols
 )
-
-if (CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
-  target_link_libraries(nativeruntime
-    -static-libgcc
-    -static-libstdc++
-    -ldl
-    -lpthread
-    -Wl,--no-undefined # print an error if there are any undefined symbols
-  )
-endif()

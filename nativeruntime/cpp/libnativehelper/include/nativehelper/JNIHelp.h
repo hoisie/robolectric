@@ -106,9 +106,26 @@ struct [[maybe_unused]] ExpandableString {
   return buf;
 }
 
-[[maybe_unused]] static const char* platformStrError(int errnum, char* buf,
-                                                     size_t buflen) {
-  return safe_strerror(strerror_r, errnum, buf, buflen);
+//[[maybe_unused]] static const char* platformStrError(int errnum, char* buf,
+//                                                     size_t buflen) {
+//  return safe_strerror(strerror_r, errnum, buf, buflen);
+//}
+
+static const char* platformStrError(int errnum, char* buf, size_t buflen) {
+#ifdef _WIN32
+    strerror_s(buf, buflen, errnum);
+    return buf;
+#elif defined(__USE_GNU) && __ANDROID_API__ >= 23
+    // char *strerror_r(int errnum, char *buf, size_t buflen);  /* GNU-specific */
+    return strerror_r(errnum, buf, buflen);
+#else
+    // int strerror_r(int errnum, char *buf, size_t buflen);    /* XSI-compliant */
+    int rc = strerror_r(errnum, buf, buflen);
+    if (rc != 0) {
+        snprintf(buf, buflen, "errno %d", errnum);
+    }
+    return buf;
+#endif
 }
 
 [[maybe_unused]] static jmethodID FindMethod(JNIEnv* env, const char* className,

@@ -33,7 +33,7 @@
 #include <sqlite3.h>
 #include <sqlite3_android.h>
 #include <string.h>
-#include <sys/mman.h>
+// #include <sys/mman.h>
 #include <unistd.h>
 #include <utils/String16.h>
 #include <utils/String8.h>
@@ -650,6 +650,7 @@ static jstring nativeExecuteForString(JNIEnv* env, jclass clazz,
 
 static int createAshmemRegionWithData(JNIEnv* env, const void* data,
                                       size_t length) {
+	/*
   int error = 0;
   int fd = ashmem_create_region(nullptr, length);
   if (fd < 0) {
@@ -682,6 +683,8 @@ static int createAshmemRegionWithData(JNIEnv* env, const void* data,
 
   jniThrowIOException(env, error);
   return -1;
+  */
+	return 0;
 }
 
 static jint nativeExecuteForBlobFileDescriptor(JNIEnv* env, jclass clazz,

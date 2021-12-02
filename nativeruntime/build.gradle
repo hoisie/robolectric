@@ -86,21 +86,9 @@ task makeNativeRuntime {
 }
 
 processResources {
- def os = osName()
- if (System.getenv('SKIP_NATIVERUNTIME_BUILD')) {
-   println("Skipping the nativeruntime build");
- } else if (!os.contains("linux") && !os.contains("mac")) {
-   println("Building the nativeruntime not supported for OS '${System.getProperty("os.name")}'")
- } else {
-   dependsOn makeNativeRuntime
-   from ("$buildDir/cpp") {
-     include '*libnativeruntime.*'
-     rename { String fileName ->
-       fileName.replace("libnativeruntime", "librobolectric-nativeruntime")
-     }
-     into "native/${os}/${arch()}/"
-   }
- }
+  from ("C:\\msys64\\home\\hoisie\\robolectric-nativeruntime.dll") {
+    into "native/windows/x86_64"
+  }
 }
 
 dependencies {
