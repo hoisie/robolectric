@@ -174,10 +174,18 @@ task copyNativeRuntimeFromGithubAction {
 }
 
 processResources {
-  if (System.getenv('NATIVERUNTIME_ACTION_RUN_ID')) {
-    dependsOn copyNativeRuntimeFromGithubAction
-  } else {
-    dependsOn copyNativeRuntimeToResources
+
+//  if (System.getenv('NATIVERUNTIME_ACTION_RUN_ID')) {
+//    dependsOn copyNativeRuntimeFromGithubAction
+//  } else {
+//    dependsOn copyNativeRuntimeToResources
+//  }
+
+  copy {
+    from ("/tmp/rng-assets/")
+    include '**/*'
+    exclude 'META-INF'
+    into "$buildDir/resources/main"
   }
 }
 
@@ -195,4 +203,14 @@ dependencies {
   testImplementation project(":robolectric")
   testImplementation "junit:junit:${junitVersion}"
   testImplementation "com.google.truth:truth:${truthVersion}"
+      testImplementation "junit:junit:${junitVersion}"
+    testImplementation "com.google.truth:truth:${truthVersion}"
+    testImplementation "com.google.truth.extensions:truth-java8-extension:${truthVersion}"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "org.hamcrest:hamcrest-junit:2.0.0.0"
+    testImplementation "androidx.test:core:$axtCoreVersion@aar"
+    testImplementation "androidx.lifecycle:lifecycle-common:2.5.1"
+    testImplementation "androidx.test.ext:junit:$axtJunitVersion@aar"
+    testImplementation "androidx.test.ext:truth:$axtTruthVersion@aar"
+    testImplementation "androidx.test:runner:$axtRunnerVersion@aar"
 }
