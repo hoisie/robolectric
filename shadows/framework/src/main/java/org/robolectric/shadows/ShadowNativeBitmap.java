@@ -1,6 +1,5 @@
 package org.robolectric.shadows;
 
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.N;
@@ -242,12 +241,12 @@ public class ShadowNativeBitmap extends ShadowBitmap {
     BitmapNatives.nativeSetHasAlpha(nativeBitmap, hasAlpha, requestPremul);
   }
 
-  @Implementation(minSdk = JELLY_BEAN_MR1, maxSdk = U.SDK_INT)
+  @Implementation
   protected static boolean nativeHasMipMap(long nativeBitmap) {
     return BitmapNatives.nativeHasMipMap(nativeBitmap);
   }
 
-  @Implementation(minSdk = JELLY_BEAN_MR1, maxSdk = U.SDK_INT)
+  @Implementation
   protected static void nativeSetHasMipMap(long nativeBitmap, boolean hasMipMap) {
     BitmapNatives.nativeSetHasMipMap(nativeBitmap, hasMipMap);
   }

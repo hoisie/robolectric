@@ -1,6 +1,6 @@
 package org.robolectric.integrationtests.axt;
 
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR2;
+import static android.os.Build.VERSION_CODES.P;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
@@ -247,7 +247,6 @@ public class ActivityScenarioTest {
     }
   }
 
-  @Config(minSdk = JELLY_BEAN_MR2)
   @Test
   public void setRotation_recreatesActivity() {
     UiAutomation uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();

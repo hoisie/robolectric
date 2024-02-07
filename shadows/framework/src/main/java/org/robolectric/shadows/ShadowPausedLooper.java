@@ -6,7 +6,6 @@ import static org.robolectric.util.ReflectionHelpers.ClassParameter.from;
 import static org.robolectric.util.reflector.Reflector.reflector;
 
 import android.app.Instrumentation;
-import android.os.Build;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
@@ -395,7 +394,7 @@ public final class ShadowPausedLooper extends ShadowLooper {
     reflector(LooperReflector.class, realLooper).quit();
   }
 
-  @Implementation(minSdk = Build.VERSION_CODES.JELLY_BEAN_MR2)
+  @Implementation
   protected void quitSafely() {
     if (isPaused()) {
       executeOnLooper(new UnPauseRunnable());

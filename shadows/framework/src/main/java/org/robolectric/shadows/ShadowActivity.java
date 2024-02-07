@@ -1,7 +1,5 @@
 package org.robolectric.shadows;
 
-import static android.os.Build.VERSION_CODES.JELLY_BEAN;
-import static android.os.Build.VERSION_CODES.KITKAT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.N;
@@ -382,7 +380,7 @@ public class ShadowActivity extends ShadowContextThemeWrapper {
    * is because `finish` modifies the members of {@link ShadowActivity#realActivity}, so
    * `isFinishing` should refer to those same members.
    */
-  @Implementation(minSdk = JELLY_BEAN)
+  @Implementation
   protected boolean isFinishing() {
     return reflector(DirectActivityReflector.class, realActivity).isFinishing();
   }
@@ -475,7 +473,7 @@ public class ShadowActivity extends ShadowContextThemeWrapper {
     lastIntentSenderRequest.send();
   }
 
-  @Implementation(minSdk = KITKAT)
+  @Implementation
   protected void reportFullyDrawn() {
     hasReportedFullyDrawn = true;
   }

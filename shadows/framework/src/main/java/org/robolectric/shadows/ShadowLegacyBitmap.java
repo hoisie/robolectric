@@ -1,7 +1,5 @@
 package org.robolectric.shadows;
 
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
-import static android.os.Build.VERSION_CODES.KITKAT;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Build.VERSION_CODES.Q;
@@ -81,13 +79,13 @@ public class ShadowLegacyBitmap extends ShadowBitmap {
     return createBitmap((DisplayMetrics) null, width, height, config);
   }
 
-  @Implementation(minSdk = JELLY_BEAN_MR1)
+  @Implementation
   protected static Bitmap createBitmap(
       DisplayMetrics displayMetrics, int width, int height, Bitmap.Config config) {
     return createBitmap(displayMetrics, width, height, config, true);
   }
 
-  @Implementation(minSdk = JELLY_BEAN_MR1)
+  @Implementation
   protected static Bitmap createBitmap(
       DisplayMetrics displayMetrics,
       int width,
@@ -197,7 +195,7 @@ public class ShadowLegacyBitmap extends ShadowBitmap {
     return createBitmap(null, colors, offset, stride, width, height, config);
   }
 
-  @Implementation(minSdk = JELLY_BEAN_MR1)
+  @Implementation
   protected static Bitmap createBitmap(
       DisplayMetrics displayMetrics,
       int[] colors,
@@ -555,7 +553,7 @@ public class ShadowLegacyBitmap extends ShadowBitmap {
     return newBitmap;
   }
 
-  @Implementation(minSdk = KITKAT)
+  @Implementation
   protected final int getAllocationByteCount() {
     return getRowBytes() * getHeight();
   }
@@ -565,7 +563,7 @@ public class ShadowLegacyBitmap extends ShadowBitmap {
     return config;
   }
 
-  @Implementation(minSdk = KITKAT)
+  @Implementation
   protected void setConfig(Bitmap.Config config) {
     this.config = config;
   }
@@ -622,12 +620,12 @@ public class ShadowLegacyBitmap extends ShadowBitmap {
     return extractAlpha();
   }
 
-  @Implementation(minSdk = JELLY_BEAN_MR1)
+  @Implementation
   protected final boolean hasMipMap() {
     return hasMipMap;
   }
 
-  @Implementation(minSdk = JELLY_BEAN_MR1)
+  @Implementation
   protected final void setHasMipMap(boolean hasMipMap) {
     this.hasMipMap = hasMipMap;
   }
@@ -637,7 +635,7 @@ public class ShadowLegacyBitmap extends ShadowBitmap {
     return width;
   }
 
-  @Implementation(minSdk = KITKAT)
+  @Implementation
   protected void setWidth(int width) {
     this.width = width;
   }
@@ -647,7 +645,7 @@ public class ShadowLegacyBitmap extends ShadowBitmap {
     return height;
   }
 
-  @Implementation(minSdk = KITKAT)
+  @Implementation
   protected void setHeight(int height) {
     this.height = height;
   }
@@ -759,7 +757,7 @@ public class ShadowLegacyBitmap extends ShadowBitmap {
     }
   }
 
-  @Implementation(minSdk = KITKAT)
+  @Implementation
   protected void reconfigure(int width, int height, Bitmap.Config config) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && this.config == Bitmap.Config.HARDWARE) {
       throw new IllegalStateException("native-backed bitmaps may not be reconfigured");
@@ -775,12 +773,12 @@ public class ShadowLegacyBitmap extends ShadowBitmap {
     bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
   }
 
-  @Implementation(minSdk = KITKAT)
+  @Implementation
   protected boolean isPremultiplied() {
     return requestPremultiplied && hasAlpha();
   }
 
-  @Implementation(minSdk = KITKAT)
+  @Implementation
   protected void setPremultiplied(boolean isPremultiplied) {
     this.requestPremultiplied = isPremultiplied;
   }

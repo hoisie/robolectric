@@ -1,6 +1,5 @@
 package org.robolectric.shadows;
 
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR2;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
@@ -391,7 +390,6 @@ public class ShadowBluetoothAdapterTest {
   }
 
   @Test
-  @Config(minSdk = JELLY_BEAN_MR2)
   public void testLeScan() {
     BluetoothAdapter.LeScanCallback callback1 = newLeScanCallback();
     BluetoothAdapter.LeScanCallback callback2 = newLeScanCallback();
@@ -409,7 +407,6 @@ public class ShadowBluetoothAdapterTest {
   }
 
   @Test
-  @Config(minSdk = JELLY_BEAN_MR2)
   public void testGetSingleLeScanCallback() {
     BluetoothAdapter.LeScanCallback callback1 = newLeScanCallback();
     BluetoothAdapter.LeScanCallback callback2 = newLeScanCallback();

@@ -1,8 +1,6 @@
 package org.robolectric.shadows;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR2;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.Build.VERSION_CODES.LOLLIPOP_MR1;
 import static android.os.Build.VERSION_CODES.M;
@@ -771,7 +769,7 @@ public class ShadowTelephonyManager {
     this.voiceNetworkType = voiceNetworkType;
   }
 
-  @Implementation(minSdk = JELLY_BEAN_MR1)
+  @Implementation
   protected List<CellInfo> getAllCellInfo() {
     return allCellInfo;
   }
@@ -779,10 +777,8 @@ public class ShadowTelephonyManager {
   public void setAllCellInfo(List<CellInfo> allCellInfo) {
     ShadowTelephonyManager.allCellInfo = allCellInfo;
 
-    if (VERSION.SDK_INT >= JELLY_BEAN_MR1) {
-      for (PhoneStateListener listener : getListenersForFlags(LISTEN_CELL_INFO)) {
-        listener.onCellInfoChanged(allCellInfo);
-      }
+    for (PhoneStateListener listener : getListenersForFlags(LISTEN_CELL_INFO)) {
+      listener.onCellInfoChanged(allCellInfo);
     }
     if (VERSION.SDK_INT >= S) {
       for (CellInfoListener listener : getCallbackForListener(CellInfoListener.class)) {
@@ -857,7 +853,7 @@ public class ShadowTelephonyManager {
     }
   }
 
-  @Implementation(minSdk = JELLY_BEAN_MR2)
+  @Implementation
   protected String getGroupIdLevel1() {
     checkReadPhoneStatePermission();
     return this.groupIdLevel1;
@@ -880,9 +876,7 @@ public class ShadowTelephonyManager {
       listener.onCallStateChanged(callState, incomingPhoneNumber);
     }
     if ((flags & LISTEN_CELL_INFO) != 0) {
-      if (VERSION.SDK_INT >= JELLY_BEAN_MR1) {
-        listener.onCellInfoChanged(allCellInfo);
-      }
+      listener.onCellInfoChanged(allCellInfo);
     }
     if ((flags & LISTEN_CELL_LOCATION) != 0) {
       listener.onCellLocationChanged(cellLocation);
