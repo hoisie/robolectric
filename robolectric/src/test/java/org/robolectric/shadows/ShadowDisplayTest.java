@@ -16,7 +16,6 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
-import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Display.HdrCapabilities;
 import android.view.DisplayCutout;
@@ -38,46 +37,6 @@ public class ShadowDisplayTest {
   public void setUp() throws Exception {
     display = DisplayManagerGlobal.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
     shadow = Shadows.shadowOf(display);
-  }
-
-  @Test
-  public void shouldProvideDisplayMetrics() {
-    shadow.setDensity(1.5f);
-    shadow.setDensityDpi(DisplayMetrics.DENSITY_HIGH);
-    shadow.setScaledDensity(1.6f);
-    shadow.setWidth(1024);
-    shadow.setHeight(600);
-    shadow.setRealWidth(1400);
-    shadow.setRealHeight(900);
-    shadow.setXdpi(183.0f);
-    shadow.setYdpi(184.0f);
-    shadow.setRefreshRate(123f);
-
-    DisplayMetrics metrics = new DisplayMetrics();
-
-    display.getMetrics(metrics);
-
-    assertEquals(1.5f, metrics.density, 0.05);
-    assertEquals(DisplayMetrics.DENSITY_HIGH, metrics.densityDpi);
-    assertEquals(1.6f, metrics.scaledDensity, 0.05);
-    assertEquals(1024, metrics.widthPixels);
-    assertEquals(600, metrics.heightPixels);
-    assertEquals(183.0f, metrics.xdpi, 0.05);
-    assertEquals(184.0f, metrics.ydpi, 0.05);
-
-    metrics = new DisplayMetrics();
-
-    display.getRealMetrics(metrics);
-
-    assertEquals(1.5f, metrics.density, 0.05);
-    assertEquals(DisplayMetrics.DENSITY_HIGH, metrics.densityDpi);
-    assertEquals(1.6f, metrics.scaledDensity, 0.05);
-    assertEquals(1400, metrics.widthPixels);
-    assertEquals(900, metrics.heightPixels);
-    assertEquals(183.0f, metrics.xdpi, 0.05);
-    assertEquals(184.0f, metrics.ydpi, 0.05);
-
-    assertEquals(0, 123f, display.getRefreshRate());
   }
 
   @Test

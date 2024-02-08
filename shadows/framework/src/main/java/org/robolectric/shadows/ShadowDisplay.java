@@ -60,95 +60,6 @@ public class ShadowDisplay {
   private Integer rotation;
   private Integer pixelFormat;
 
-  /**
-   * If {@link #setScaledDensity(float)} has been called, {@link DisplayMetrics#scaledDensity} will
-   * be modified to reflect the value specified. Note that this is not a realistic state.
-   *
-   * @deprecated This behavior is deprecated and will be removed in Robolectric 3.7.
-   */
-  @Deprecated
-  @Implementation
-  protected void getMetrics(DisplayMetrics outMetrics) {
-    if (isJB()) {
-      outMetrics.density = densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
-      outMetrics.densityDpi = densityDpi;
-      outMetrics.scaledDensity = scaledDensity;
-      outMetrics.widthPixels = width;
-      outMetrics.heightPixels = height;
-      outMetrics.xdpi = xdpi;
-      outMetrics.ydpi = ydpi;
-    } else {
-      reflector(_Display_.class, realObject).getMetrics(outMetrics);
-      if (scaledDensity != null) {
-        outMetrics.scaledDensity = scaledDensity;
-      }
-    }
-  }
-
-  /**
-   * If {@link #setScaledDensity(float)} has been called, {@link DisplayMetrics#scaledDensity} will
-   * be modified to reflect the value specified. Note that this is not a realistic state.
-   *
-   * @deprecated This behavior is deprecated and will be removed in Robolectric 3.7.
-   */
-  @Deprecated
-  @Implementation
-  protected void getRealMetrics(DisplayMetrics outMetrics) {
-    if (isJB()) {
-      getMetrics(outMetrics);
-      outMetrics.widthPixels = realWidth;
-      outMetrics.heightPixels = realHeight;
-    } else {
-      reflector(_Display_.class, realObject).getRealMetrics(outMetrics);
-      if (scaledDensity != null) {
-        outMetrics.scaledDensity = scaledDensity;
-      }
-    }
-  }
-
-  /**
-   * If {@link #setDisplayId(int)} has been called, this method will return the specified value.
-   *
-   * @deprecated This behavior is deprecated and will be removed in Robolectric 3.7.
-   */
-  @Deprecated
-  @Implementation
-  protected int getDisplayId() {
-    return displayId == null ? reflector(_Display_.class, realObject).getDisplayId() : displayId;
-  }
-
-  /**
-   * If {@link #setRefreshRate(float)} has been called, this method will return the specified value.
-   *
-   * @deprecated This behavior is deprecated and will be removed in Robolectric 3.7.
-   */
-  @Deprecated
-  @Implementation
-  protected float getRefreshRate() {
-    if (refreshRate != null) {
-      return refreshRate;
-    }
-    float realRefreshRate = reflector(_Display_.class, realObject).getRefreshRate();
-    // refresh rate may be set by native code. if its 0, set to 60fps
-    if (realRefreshRate < 0.1) {
-      realRefreshRate = 60;
-    }
-    return realRefreshRate;
-  }
-
-  /**
-   * If {@link #setPixelFormat(int)} has been called, this method will return the specified value.
-   *
-   * @deprecated This behavior is deprecated and will be removed in Robolectric 3.7.
-   */
-  @Deprecated
-  @Implementation
-  protected int getPixelFormat() {
-    return pixelFormat == null
-        ? reflector(_Display_.class, realObject).getPixelFormat()
-        : pixelFormat;
-  }
-
   @Implementation(maxSdk = JELLY_BEAN)
   protected void getSizeInternal(Point outSize, boolean doCompat) {
     outSize.x = width;
@@ -219,29 +130,6 @@ public class ShadowDisplay {
     } else {
       ShadowDisplayManager.changeDisplay(realObject.getDisplayId(), di -> di.physicalYDpi = ydpi);
     }
-  }
-
-  /**
-   * Changes the scaled density for this display.
-   *
-   * @deprecated This method is deprecated and will be removed in Robolectric 3.7.
-   */
-  @Deprecated
-  public void setScaledDensity(float scaledDensity) {
-    this.scaledDensity = scaledDensity;
-  }
-
-  /**
-   * Changes the ID for this display.
-   *
-   * <p>Any registered {@link android.hardware.display.DisplayManager.DisplayListener}s will be
-   * notified of the change.
-   *
-   * @deprecated This method is deprecated and will be removed in Robolectric 3.7.
-   */
-  @Deprecated
-  public void setDisplayId(int displayId) {
-    this.displayId = displayId;
   }
 
   /**
@@ -362,16 +250,6 @@ public class ShadowDisplay {
     } else {
       ShadowDisplayManager.changeDisplay(realObject.getDisplayId(), di -> di.rotation = rotation);
     }
-  }
-
-  /**
-   * Changes the pixel format for this display.
-   *
-   * @deprecated This method is deprecated and will be removed in Robolectric 3.7.
-   */
-  @Deprecated
-  public void setPixelFormat(int pixelFormat) {
-    this.pixelFormat = pixelFormat;
   }
 
   /**
