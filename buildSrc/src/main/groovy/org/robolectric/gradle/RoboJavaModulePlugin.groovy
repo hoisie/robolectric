@@ -83,6 +83,7 @@ class RoboJavaModulePlugin implements Plugin<Project> {
                     '--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED',
                     '--add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED',
                     '--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED',
+                    '-Dsun.io.serialization.extendedDebugInfo=true',
             ]
 
             doFirst {

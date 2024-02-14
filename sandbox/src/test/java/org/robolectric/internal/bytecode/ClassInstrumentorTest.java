@@ -10,7 +10,9 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.robolectric.shadow.api.Shadow;
 
@@ -35,6 +37,26 @@ public class ClassInstrumentorTest {
   }
 
   @Test
+  public void instrumentMethod_legacy() {
+    ClassNode classNode = createClassWithRegularNativeMethod();
+    MutableClass clazz =
+        new MutableClass(
+            classNode, InstrumentationConfiguration.newBuilder().build(), classNodeProvider);
+    instrumentor.instrument(clazz);
+
+    String someFunctionName = Shadow.directMethodName("org.example.MyClass", "someFunction");
+    MethodNode methodNode = findMethodNode(classNode, someFunctionName);
+
+    assertThat(clazz.classNode.interfaces).contains(Type.getInternalName(ShadowedObject.class));
+    assertRoboDataField(clazz.getFields().get(0));
+
+    // Side effect: original method has been made private.
+    assertThat(methodNode.access & Opcodes.ACC_PRIVATE).isNotEqualTo(0);
+    // Side effect: instructions have been rewritten to return 0.
+    assertThat(methodNode.instructions).isEmpty();
+  }
+
+  @Test
   public void instrumentNativeMethod_legacy() {
     ClassNode classNode = createClassWithNativeMethod();
     MutableClass clazz =
@@ -44,6 +66,82 @@ public class ClassInstrumentorTest {
 
     String someFunctionName = Shadow.directMethodName("org.example.MyClass", "someFunction");
     MethodNode methodNode = findMethodNode(classNode, someFunctionName);
+
+    assertThat(clazz.classNode.interfaces).contains(Type.getInternalName(ShadowedObject.class));
+    assertRoboDataField(clazz.getFields().get(0));
+
+    // Side effect: original method has been made private.
+    assertThat(methodNode.access & Opcodes.ACC_PRIVATE).isNotEqualTo(0);
+    // Side effect: instructions have been rewritten to return 0.
+    assertThat(methodNode.instructions.size()).isEqualTo(2);
+    assertThat(methodNode.instructions.get(0).getOpcode()).isEqualTo(Opcodes.ICONST_0);
+    assertThat(methodNode.instructions.get(1).getOpcode()).isEqualTo(Opcodes.IRETURN);
+  }
+
+  @Test
+  public void instrumentNativeMethod_withoutExemption_generatesThrowException() throws IOException {
+    File exemptionsFile = tempFolder.newFile("natives.txt");
+    try (BufferedWriter writer =
+        new BufferedWriter(new FileWriter(exemptionsFile.getPath(), UTF_8))) {
+      writer.write("org.example.MyClass#someOtherMethod()V\n");
+    }
+
+    NativeCallHandler nativeCallHandler =
+        new NativeCallHandler(
+            exemptionsFile, /* writeExemptions= */ false, /* throwOnNatives= */ true);
+    instrumentor.setNativeCallHandler(nativeCallHandler);
+
+    ClassNode classNode = createClassWithNativeMethod();
+    MutableClass clazz =
+        new MutableClass(
+            classNode, InstrumentationConfiguration.newBuilder().build(), classNodeProvider);
+    instrumentor.instrument(clazz);
+
+    String someFunctionName = Shadow.directMethodName("org.example.MyClass", "someFunction");
+    MethodNode methodNode = findMethodNode(classNode, someFunctionName);
+
+    assertThat(clazz.classNode.interfaces).contains(Type.getInternalName(ShadowedObject.class));
+    assertRoboDataField(clazz.getFields().get(0));
+
+    // Side effect: original method has been made private.
+    assertThat(methodNode.access & Opcodes.ACC_PRIVATE).isNotEqualTo(0);
+    // Side effect: instructions have been rewritten to throw and return.
+    assertThat(methodNode.instructions.size()).isEqualTo(7);
+    assertThat(methodNode.instructions.get(0).getOpcode()).isEqualTo(Opcodes.NEW);
+    assertThat(methodNode.instructions.get(1).getOpcode()).isEqualTo(Opcodes.DUP);
+    assertThat(methodNode.instructions.get(2).getOpcode()).isEqualTo(Opcodes.LDC);
+    assertThat(methodNode.instructions.get(3).getOpcode()).isEqualTo(Opcodes.INVOKESPECIAL);
+    assertThat(methodNode.instructions.get(4).getOpcode()).isEqualTo(Opcodes.ATHROW);
+    assertThat(methodNode.instructions.get(5).getOpcode()).isEqualTo(Opcodes.ICONST_0);
+    assertThat(methodNode.instructions.get(6).getOpcode()).isEqualTo(Opcodes.IRETURN);
+  }
+
+  @Test
+  public void instrumentNativeMethod_withExemption_generatesNoOpReturn() throws IOException {
+    File exemptionsFile = tempFolder.newFile("natives.txt");
+    try (BufferedWriter writer =
+        new BufferedWriter(new FileWriter(exemptionsFile.getPath(), UTF_8))) {
+      writer.write("org.example.MyClass#someOtherMethod()V\n");
+      writer.write("org.example.MyClass#someFunction()I\n");
+    }
+
+    NativeCallHandler nativeCallHandler =
+        new NativeCallHandler(
+            exemptionsFile, /* writeExemptions= */ false, /* throwOnNatives= */ true);
+    instrumentor.setNativeCallHandler(nativeCallHandler);
+
+    ClassNode classNode = createClassWithNativeMethod();
+
+    MutableClass clazz =
+        new MutableClass(
+            classNode, InstrumentationConfiguration.newBuilder().build(), classNodeProvider);
+    instrumentor.instrument(clazz);
+
+    String someFunctionName = Shadow.directMethodName("org.example.MyClass", "someFunction");
+    MethodNode methodNode = findMethodNode(classNode, someFunctionName);
+
+    assertThat(clazz.classNode.interfaces).contains(Type.getInternalName(ShadowedObject.class));
+    assertRoboDataField(clazz.getFields().get(0));
 
     // Side effect: original method has been made private.
     assertThat(methodNode.access & Opcodes.ACC_PRIVATE).isNotEqualTo(0);
@@ -64,9 +162,19 @@ public class ClassInstrumentorTest {
     String nativeMethodName = Shadow.directNativeMethodName("org.example.MyClass", "someFunction");
     MethodNode methodNode = findMethodNode(classNode, nativeMethodName);
 
+    assertThat(clazz.classNode.interfaces).contains(Type.getInternalName(ShadowedObject.class));
+    assertRoboDataField(clazz.getFields().get(0));
+
     assertThat(methodNode.access & Opcodes.ACC_NATIVE).isNotEqualTo(0);
     assertThat(methodNode.access & Opcodes.ACC_PRIVATE).isNotEqualTo(0);
     assertThat(methodNode.access & Opcodes.ACC_SYNTHETIC).isNotEqualTo(0);
+  }
+
+  private static ClassNode createClassWithRegularNativeMethod() {
+    ClassNode classNode = new ClassNode();
+    classNode.name = "org/example/MyClass";
+    classNode.methods.add(new MethodNode(Opcodes.ACC_PUBLIC, "someFunction", "()I", null, null));
+    return classNode;
   }
 
   private static ClassNode createClassWithNativeMethod() {
@@ -79,5 +187,13 @@ public class ClassInstrumentorTest {
 
   private static MethodNode findMethodNode(ClassNode classNode, String name) {
     return Iterables.find(classNode.methods, input -> input.name.equals(name));
+  }
+
+  private static void assertRoboDataField(FieldNode fieldNode) {
+    assertThat(fieldNode.access).isEqualTo(Opcodes.ACC_PUBLIC | Opcodes.ACC_TRANSIENT);
+    assertThat(fieldNode.name).isEqualTo(ShadowConstants.CLASS_HANDLER_DATA_FIELD_NAME);
+    assertThat(fieldNode.desc).isEqualTo(Type.getDescriptor(Object.class));
+    assertThat(fieldNode.signature).isEqualTo(Type.getDescriptor(Object.class));
+    assertThat(fieldNode.value).isNull();
   }
 }
