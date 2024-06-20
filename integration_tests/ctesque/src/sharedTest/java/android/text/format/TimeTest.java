@@ -262,14 +262,10 @@ public class TimeTest {
     // ICS
 
     // date_and_time
-    assertEquals(
-        "Sep 8, 1987, 2:13:12 PM",
-        t.format("%b %-e, %Y, %-l:%M:%S %p"));
+    assertEquals("Sep 8, 1987, 2:13:12 PM", t.format("%b %-e, %Y, %-l:%M:%S %p"));
 
     // hour_minute_cap_ampm
-    assertEquals(
-        "2:13PM",
-        t.format("%-l:%M%^p"));
+    assertEquals("2:13PM", t.format("%-l:%M%^p"));
   }
 
   @Test
@@ -279,8 +275,8 @@ public class TimeTest {
     assertEquals("19700101T000000", t.format2445());
 
     t.timezone = Time.TIMEZONE_UTC;
-    //2445 formatted date should hava a Z postfix
-    assertEquals("19700101T000000Z",t.format2445());
+    // 2445 formatted date should hava a Z postfix
+    assertEquals("19700101T000000Z", t.format2445());
   }
 
   @Test
@@ -339,5 +335,4 @@ public class TimeTest {
 
     assertEquals(day, julianDay);
   }
-
 }
