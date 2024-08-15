@@ -84,27 +84,27 @@ public class ShadowUserManager {
   private final Object lock = new Object();
 
   @RealObject private UserManager realObject;
-  private UserManagerState userManagerState;
-  private Boolean managedProfile;
-  private Boolean cloneProfile;
-  private boolean userUnlocked = true;
-  private boolean isSystemUser = true;
-  private volatile boolean isForegroundUser = true;
+  private static UserManagerState userManagerState;
+  private static Boolean managedProfile;
+  private static Boolean cloneProfile;
+  private static boolean userUnlocked = true;
+  private static boolean isSystemUser = true;
+  private static volatile boolean isForegroundUser = true;
 
   /**
    * Holds whether or not a managed profile can be unlocked. If a profile is not in this map, it is
    * assume it can be unlocked.
    */
-  private String seedAccountName;
+  private static String seedAccountName;
 
-  private String seedAccountType;
-  private PersistableBundle seedAccountOptions;
+  private static String seedAccountType;
+  private static PersistableBundle seedAccountOptions;
 
   private Context context;
-  private boolean enforcePermissions;
-  private int userSwitchability = UserManager.SWITCHABILITY_STATUS_OK;
+  private static boolean enforcePermissions;
+  private static int userSwitchability = UserManager.SWITCHABILITY_STATUS_OK;
 
-  private final Set<Account> userAccounts = new HashSet<>();
+  private static final Set<Account> userAccounts = new HashSet<>();
 
   /**
    * Global UserManager state. Shared across {@link UserManager}s created in different {@link
@@ -1247,6 +1247,18 @@ public class ShadowUserManager {
     maxSupportedUsers = DEFAULT_MAX_SUPPORTED_USERS;
     isMultiUserSupported = false;
     isHeadlessSystemUserMode = false;
+    userManagerState = new UserManagerState();
+    managedProfile = null;
+    cloneProfile = null;
+    userUnlocked = true;
+    isSystemUser = true;
+    isForegroundUser = true;
+    seedAccountName = null;
+    seedAccountType = null;
+    seedAccountOptions = null;
+    enforcePermissions = false;
+    userSwitchability = UserManager.SWITCHABILITY_STATUS_OK;
+    userAccounts.clear();
   }
 
   @ForType(UserManager.class)
