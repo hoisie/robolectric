@@ -62,6 +62,7 @@ if (System.getenv("PUBLISH_NATIVERUNTIME_DIST_COMPAT") == "true") {
 
 dependencies {
   api(project(":utils"))
+  api(project(":shadowapi"))
   api(project(":utils:reflector"))
   api(libs.guava)
 
