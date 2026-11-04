@@ -1,0 +1,114 @@
+# Throwaway: measures emulator start-up with and without the AVD snapshot cache used by
+# the instrumentation-tests job in tests.yml. The emulator steps match tests.yml exactly.
+name: Measure AVD cache
+
+on:
+  push:
+    branches: [ measure-avd-cache ]
+
+env:
+  EMULATOR_OPTIONS: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+
+jobs:
+  # The same as the "Create AVD and generate snapshot for caching" step on a cache miss.
+  create-snapshot:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        api-level: [ 30, 36 ]
+    steps:
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Create AVD and generate snapshot for caching
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: aosp_atd
+          arch: x86_64
+          channel: canary
+          force-avd-creation: false
+          emulator-options: ${{ env.EMULATOR_OPTIONS }}
+          disable-animations: true
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Save AVD
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-measure-${{ matrix.api-level }}-${{ github.run_id }}
+
+  # Today's flow: restore the cached AVD and boot from its snapshot.
+  snapshot:
+    runs-on: ubuntu-latest
+    needs: create-snapshot
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [ 30, 36 ]
+        rep: [ 1, 2, 3 ]
+    steps:
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: AVD cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-measure-${{ matrix.api-level }}-${{ github.run_id }}
+          fail-on-cache-miss: true
+
+      - name: Run device tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: aosp_atd
+          arch: x86_64
+          channel: canary
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save ${{ env.EMULATOR_OPTIONS }}
+          disable-animations: true
+          profile: Nexus One
+          script: |
+            adb shell wm density 240
+            adb shell getprop sys.boot_completed
+
+  # Without the AVD cache: the same "Run device tests" step creates the AVD and cold boots.
+  cold:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [ 30, 36 ]
+        rep: [ 1, 2, 3 ]
+    steps:
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run device tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: aosp_atd
+          arch: x86_64
+          channel: canary
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save ${{ env.EMULATOR_OPTIONS }}
+          disable-animations: true
+          profile: Nexus One
+          script: |
+            adb shell wm density 240
+            adb shell getprop sys.boot_completed
