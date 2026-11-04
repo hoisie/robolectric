@@ -65,8 +65,8 @@ class AndroidSdk(
     val TIRAMISU = AndroidSdk(33, "13", "9030017")
     val U = AndroidSdk(34, "14", "10818077")
     val V = AndroidSdk(35, "15", "14663667-2")
-    val BAKLAVA = AndroidSdk(36, "16", "13921718")
-    val CINNAMON_BUN = AndroidSdk(37, "17", "15733970")
+    val BAKLAVA = AndroidSdk(36, "16", "13921718-2")
+    val CINNAMON_BUN = AndroidSdk(37, "17", "16653203")
 
     val ALL_SDKS =
       listOf(M, N, N_MR1, O, O_MR1, P, Q, R, S, S_V2, TIRAMISU, U, V, BAKLAVA, CINNAMON_BUN)
