@@ -1,0 +1,34 @@
+# Throwaway: times downloading the instrumented android-all jars from Maven Central and from
+# Google's Maven Central mirror on GitHub-hosted runners.
+name: Measure Maven mirror
+
+on:
+  push:
+    branches: [ measure-avd-cache ]
+
+jobs:
+  download:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        rep: [ 1, 2, 3 ]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Download from both, alternating
+        run: |
+          jars="10-robolectric-5803371-i7 11-robolectric-6757853-i7 12-robolectric-7732740-i7
+            13-robolectric-9030017-i7 14-robolectric-10818077-i7 15-robolectric-14663667-2-i7
+            16-robolectric-13921718-2-i7 17-robolectric-16653203-i7"
+          central=https://repo.maven.apache.org/maven2
+          google=https://maven-central.storage-download.googleapis.com/maven2
+          for v in $jars; do
+            path=org/robolectric/android-all-instrumented/$v/android-all-instrumented-$v.jar
+            for name in central google; do
+              base=${!name}
+              curl -sS -o /dev/null -w "RESULT\t$name\t$v\t%{http_code}\t%{size_download}\t%{time_total}\t%{remote_ip}\n" "$base/$path" || printf "RESULT\t%s\t%s\terror\n" "$name" "$v"
+            done
+          done

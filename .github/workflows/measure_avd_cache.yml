@@ -3,8 +3,7 @@
 name: Measure AVD cache
 
 on:
-  push:
-    branches: [ measure-avd-cache ]
+  workflow_dispatch:
 
 env:
   EMULATOR_OPTIONS: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
