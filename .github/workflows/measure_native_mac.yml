@@ -34,9 +34,9 @@ jobs:
         run: |
           ( while true; do sleep 2
               for p in $(jps -l | awk '/GradleWorkerMain|Gradle Test Executor/ {print $1}'); do
-                echo "=== $(date +%T) $p"; jstack "$p" | awk '/^"Test worker"/,/^$/'; done
+                echo "=== $(date +%T) $p"; jstack "$p" | awk '/^"(SDK [0-9]+ Main Thread|Test worker)"/,/^$/'; done
             done ) > dumps.txt 2>&1 &
-          ./gradlew :integration_tests:nativegraphics:testDebugUnitTest --tests '*ShadowNativeStaticLayoutTest.testReplacementFontMetricsTest' \
+          ./gradlew :integration_tests:nativegraphics:testDebugUnitTest --tests '*ShadowNativeStaticLayoutTest.testReplacementFontMetricsTest*' \
             -Drobolectric.alwaysIncludeVariantMarkersInTestName=true -Drobolectric.enabledSdks=33,34 --rerun || true
           kill %1 || true
           python3 - <<'P'
