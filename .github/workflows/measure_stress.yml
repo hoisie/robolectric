@@ -1,0 +1,48 @@
+# Throwaway: the committed-memory growth of the new stress test, with and without leaks.
+name: Measure stress test
+
+on:
+  push:
+    branches: [ measure-stress-test ]
+
+jobs:
+  measure:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-26-intel, windows-latest ]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      SKIP_ERRORPRONE: true
+      SKIP_JAVADOC: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: 'temurin'
+          java-version-file: .github/.java-version
+          check-latest: true
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+      - if: matrix.os == 'ubuntu-24.04-arm'
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools platforms;android-36'
+      - name: Build
+        run: ./gradlew -q :integration_tests:nativegraphics:compileDebugUnitTestJavaWithJavac
+      - name: Measure
+        run: |
+          run() {
+            out=$(./gradlew :integration_tests:nativegraphics:testDebugUnitTest --rerun \
+              --tests '*ShadowNativeAllocationRegistryTest.nativeAllocationRegistryStressTest*' 2>&1 || true)
+            growth=$(grep -o 'STRESS growth MB: -\?[0-9]*' <<< "$out" | grep -o -- '-\?[0-9]*$' || echo none)
+            printf 'RESULT\t%s\t%s\t%s\n' "${{ matrix.os }}" "$1" "$growth"
+          }
+          for i in 1 2 3; do run baseline; done
+          for m in free-three-quarters free-noop; do
+            git apply ".github/measure/mutant-$m.patch"; run "$m"; git checkout -- shadows/
+          done

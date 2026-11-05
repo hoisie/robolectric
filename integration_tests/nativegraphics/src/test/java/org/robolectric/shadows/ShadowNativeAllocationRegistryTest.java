@@ -42,16 +42,38 @@ public final class ShadowNativeAllocationRegistryTest {
     return matrix;
   }
 
+  /**
+   * Checks that native memory is freed once its Java object is garbage collected. Each bitmap holds
+   * 4 MB of native pixels, freed by its NativeAllocationRegistry, so if they leak, the process's
+   * committed memory grows by the 3 GB of all the bitmaps instead of a few garbage collections'
+   * worth.
+   */
   @Config(sdk = S) // No need to re-run on multiple SDK levels
   @Test
-  public void nativeAllocationRegistryStressTest() {
-    for (int i = 0; i < 10_000; i++) {
+  public void nativeAllocationRegistryStressTest() throws Exception {
+    long before = committedMemory();
+    for (int i = 0; i < 750; i++) {
       Bitmap bitmap = Bitmap.createBitmap(1000, 1000, Bitmap.Config.ARGB_8888);
       bitmap.eraseColor(Color.BLUE);
-      if (i % 100 == 0) {
+      if (i % 25 == 0) {
         System.gc();
       }
     }
+    long growthMb = (committedMemory() - before) >> 20;
+    System.err.println("STRESS growth MB: " + growthMb);
+    assertThat(growthMb).isLessThan(1024);
+  }
+
+  /** The JVM's OperatingSystemMXBean, which isn't in android.jar, so reflection is used. */
+  private static long committedMemory() throws ReflectiveOperationException {
+    Object os =
+        Class.forName("java.lang.management.ManagementFactory")
+            .getMethod("getOperatingSystemMXBean")
+            .invoke(null);
+    return (long)
+        Class.forName("com.sun.management.OperatingSystemMXBean")
+            .getMethod("getCommittedVirtualMemorySize")
+            .invoke(os);
   }
 
   @ForType(Matrix.class)

@@ -1,0 +1,13 @@
+diff --git a/shadows/framework/src/main/java/org/robolectric/shadows/ShadowNativeAllocationRegistry.java b/shadows/framework/src/main/java/org/robolectric/shadows/ShadowNativeAllocationRegistry.java
+index 8de59291a..46fd937e9 100644
+--- a/shadows/framework/src/main/java/org/robolectric/shadows/ShadowNativeAllocationRegistry.java
++++ b/shadows/framework/src/main/java/org/robolectric/shadows/ShadowNativeAllocationRegistry.java
+@@ -74,7 +74,7 @@ public class ShadowNativeAllocationRegistry {
+ 
+   @Implementation(maxSdk = UPSIDE_DOWN_CAKE)
+   protected static void applyFreeFunction(long freeFunction, long nativePtr) {
+-    NativeAllocationRegistryNatives.applyFreeFunction(freeFunction, nativePtr);
++    // leak
+   }
+ 
+   @ForType(NativeAllocationRegistry.class)

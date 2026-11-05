@@ -1,0 +1,24 @@
+diff --git a/shadows/framework/src/main/java/org/robolectric/shadows/ShadowNativeAllocationRegistry.java b/shadows/framework/src/main/java/org/robolectric/shadows/ShadowNativeAllocationRegistry.java
+index 8de59291a..4fea02a13 100644
+--- a/shadows/framework/src/main/java/org/robolectric/shadows/ShadowNativeAllocationRegistry.java
++++ b/shadows/framework/src/main/java/org/robolectric/shadows/ShadowNativeAllocationRegistry.java
+@@ -25,6 +25,8 @@ import org.robolectric.util.reflector.ForType;
+     shadowPicker = Picker.class,
+     callNativeMethodsByDefault = true)
+ public class ShadowNativeAllocationRegistry {
++  private static final java.util.concurrent.atomic.AtomicLong COUNT =
++      new java.util.concurrent.atomic.AtomicLong();
+ 
+   @RealObject protected NativeAllocationRegistry realNativeAllocationRegistry;
+ 
+@@ -74,7 +76,9 @@ public class ShadowNativeAllocationRegistry {
+ 
+   @Implementation(maxSdk = UPSIDE_DOWN_CAKE)
+   protected static void applyFreeFunction(long freeFunction, long nativePtr) {
+-    NativeAllocationRegistryNatives.applyFreeFunction(freeFunction, nativePtr);
++    if (COUNT.incrementAndGet() % 4 != 0) {
++      NativeAllocationRegistryNatives.applyFreeFunction(freeFunction, nativePtr);
++    }
+   }
+ 
+   @ForType(NativeAllocationRegistry.class)
