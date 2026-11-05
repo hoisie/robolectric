@@ -30,7 +30,7 @@ jobs:
         if: matrix.os == 'ubuntu-24.04-arm'
         uses: android-actions/setup-android@v4
         with:
-          packages: 'platform-tools platforms;android-37'
+          packages: 'platform-tools platforms;android-36'
 
       - name: Run the release check project against the published version
         shell: bash
