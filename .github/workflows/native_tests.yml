@@ -2,7 +2,7 @@ name: Native Tests
 
 on:
   push:
-    branches: [ master, 'robolectric-*.x', 'google' ]
+    branches: [ master, 'robolectric-*.x', 'google', verify-cache-excludes ]
     paths-ignore:
       - '**.md'
 
@@ -66,7 +66,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
-          cache-read-only: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/google' }}
+          cache-read-only: false  # Throwaway: let the fork branch save the cache.
           # The android-all jars (about 2 GB) are downloaded from Maven Central, not cached.
           gradle-home-cache-excludes: |
             caches/modules-2/files-2.1/org.robolectric/android-all
