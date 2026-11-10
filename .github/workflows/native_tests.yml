@@ -2,7 +2,7 @@ name: Native Tests
 
 on:
   push:
-    branches: [ master, 'robolectric-*.x', 'google' ]
+    branches: [ master, 'robolectric-*.x', 'google', 'measure-rosetta-*' ]
     paths-ignore:
       - '**.md'
 
@@ -34,9 +34,6 @@ jobs:
         device: [
           macos-latest, # Tests Mac arm64
           macos-latest-x64, # Tests Mac x86_64, on Apple Silicon under Rosetta 2
-          ubuntu-latest, # Tests Linux x86_64
-          ubuntu-24.04-arm, # Tests Linux arm64
-          windows-latest, # Tests Windows x86_64
         ]
         include:
           # An x64 JDK on an arm64 Mac runs the tests under Rosetta 2, loading the x86_64 native
@@ -44,13 +41,6 @@ jobs:
           - device: macos-latest-x64
             runs-on: macos-latest
             java-architecture: x64
-          # Linux arm64 runs the native graphics tests on every SDK from O.
-          - device: ubuntu-24.04-arm
-            setup-android-sdk: true
-            # A test without an SDK in its @Config only runs on the target SDK. A minSdk
-            # default runs each test on every SDK from it.
-            nativegraphics-min-sdk: 26
-            gradle-tasks: ':integration_tests:nativegraphics:testDebugUnitTest'
 
     name: Native Tests
     runs-on: ${{ matrix.runs-on || matrix.device }}
@@ -116,6 +106,7 @@ jobs:
           # Empty, so the tests use Gradle's JDK, except for the Rosetta 2 job.
           TEST_JAVA_HOME: ${{ steps.test-jdk.outputs.path }}
         run: >
+          (while sleep 30; do ps -axo command | grep '[G]radle Test Executor' | awk '{print "TEST JVM: " $1}' | sort -u; done) &
           ./gradlew
           ${{ matrix.gradle-tasks || ':integration_tests:nativegraphics:testDebugUnitTest :integration_tests:roborazzi:verifyRoborazziDebug :integration_tests:ctesque:testDebugUnitTestNativeResources' }}
           --stacktrace --continue
