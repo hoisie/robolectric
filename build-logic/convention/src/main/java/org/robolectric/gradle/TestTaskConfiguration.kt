@@ -34,6 +34,12 @@ fun Test.configureTestTask() {
 
   System.getenv("GRADLE_MAX_PARALLEL_FORKS")?.toIntOrNull()?.let { maxParallelForks = it }
 
+  // Runs the tests on another JDK than Gradle's, such as an x64 JDK under Rosetta 2.
+  val testJavaHome = System.getenv("TEST_JAVA_HOME")
+  if (!testJavaHome.isNullOrEmpty()) {
+    executable = File(testJavaHome, "bin/java").path
+  }
+
   jvmArgumentProviders.add(
     RobolectricJvmArgumentsProvider(
       robolectricPropertiesProvider = project.providers.systemPropertiesPrefixedBy("robolectric."),
