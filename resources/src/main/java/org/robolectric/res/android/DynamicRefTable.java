@@ -123,7 +123,7 @@ public class DynamicRefTable {
     if (index == null) {
       return UNKNOWN_ERROR;
     }
-    mLookupTable[index] = packageId;
+    mLookupTable[index & 0xff] = packageId;
     return NO_ERROR;
   }
 

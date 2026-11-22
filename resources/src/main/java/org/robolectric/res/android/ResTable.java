@@ -107,7 +107,7 @@ public class ResTable {
   }
 
   static int Res_GETPACKAGE(int id) {
-    return ((id >> 24) - 1);
+    return ((id >>> 24) - 1);
   }
 
   public static int Res_GETTYPE(int id) {
