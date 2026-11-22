@@ -38,6 +38,8 @@ include(
   ":integration_tests:composeui",
   ":integration_tests:ctesque",
   ":integration_tests:dependency-on-stubs",
+  ":integration_tests:dynamic-feature:app",
+  ":integration_tests:dynamic-feature:feature",
   ":integration_tests:firebase",
   ":integration_tests:jacoco-offline",
   ":integration_tests:junit-platform-engine",

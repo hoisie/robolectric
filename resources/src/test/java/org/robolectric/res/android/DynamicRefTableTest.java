@@ -183,6 +183,21 @@ public class DynamicRefTableTest {
     assertThat(entries).isEmpty();
   }
 
+  @Test
+  public void addMapping_packageIdAbove0x7f_mapsResourceIds() {
+    // AGP assigns dynamic feature modules build-time package IDs such as 0x83.
+    final String featurePackage = "com.example.app.feature";
+    final ByteBuffer buf = createLibraryTableBuffer(0x83, featurePackage);
+    DynamicRefTable dynamicRefTable = new DynamicRefTable((byte) 0x83, false);
+    assertThat(dynamicRefTable.load(new ResTable_lib_header(buf, 0))).isEqualTo(NO_ERROR);
+
+    assertThat(dynamicRefTable.addMapping(featurePackage, (byte) 0x83)).isEqualTo(NO_ERROR);
+
+    Ref<Integer> resId = new Ref<>(0x83010002);
+    assertThat(dynamicRefTable.lookupResourceId(resId)).isEqualTo(NO_ERROR);
+    assertThat(resId.get()).isEqualTo(0x83010002);
+  }
+
   // Helper method to create a library table buffer with a single entry
   private ByteBuffer createLibraryTableBuffer(int packageId, String packageName) {
     return createLibraryTableBuffer(new int[] {packageId}, new String[] {packageName});
