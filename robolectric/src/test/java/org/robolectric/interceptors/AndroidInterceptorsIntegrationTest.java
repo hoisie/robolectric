@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.SystemClock;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import com.google.common.collect.Range;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.PrintStream;
@@ -17,10 +18,12 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.LooperMode;
 import org.robolectric.internal.bytecode.InvokeDynamicSupport;
+import org.robolectric.junit.rules.SetSystemPropertyRule;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowSystemClock;
 import org.robolectric.util.ReflectionHelpers.ClassParameter;
@@ -28,6 +31,7 @@ import org.robolectric.util.ReflectionHelpers.ClassParameter;
 /** Integration tests for Android interceptors. */
 @RunWith(AndroidJUnit4.class)
 public class AndroidInterceptorsIntegrationTest {
+  @Rule public SetSystemPropertyRule setSystemPropertyRule = new SetSystemPropertyRule();
 
   @Test
   public void systemLog_shouldWriteToStderr() throws Throwable {
@@ -79,6 +83,8 @@ public class AndroidInterceptorsIntegrationTest {
 
   @Test
   public void systemCurrentTimeMillis_shouldReturnShadowClockTime() throws Throwable {
+    // The virtual clock that framework code reads unless robolectric.useRealWallClock is set.
+    setSystemPropertyRule.set("robolectric.useRealWallClock", "false");
     if (ShadowLooper.looperMode() == LooperMode.Mode.LEGACY) {
       ShadowSystemClock.setNanoTime(Duration.ofMillis(200).toNanos());
     } else {
@@ -87,6 +93,18 @@ public class AndroidInterceptorsIntegrationTest {
 
     long currentTimeMillis = invokeDynamic(System.class, "currentTimeMillis", long.class);
     assertThat(currentTimeMillis).isEqualTo(200);
+  }
+
+  @Test
+  public void systemCurrentTimeMillis_withRealWallClock_shouldReturnWallClockTime()
+      throws Throwable {
+    setSystemPropertyRule.set("robolectric.useRealWallClock", "true");
+
+    long before = System.currentTimeMillis();
+    long currentTimeMillis = invokeDynamic(System.class, "currentTimeMillis", long.class);
+    long after = System.currentTimeMillis();
+
+    assertThat(currentTimeMillis).isIn(Range.closed(before, after));
   }
 
   /* Creates a FileDescriptor-object using reflection. Note that the "fd"-field is present for
